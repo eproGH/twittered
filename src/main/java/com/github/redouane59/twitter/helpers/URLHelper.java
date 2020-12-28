@@ -66,6 +66,7 @@ public class URLHelper {
   public static final  String GET_OAUTH1_TOKEN_URL          = "https://api.twitter.com/oauth/request_token";
   public static final  String GET_OAUTH1_ACCESS_TOKEN_URL   = "https://api.twitter.com/oauth/access_token";
   private static final String MAX_RESULTS                   = "max_results";
+  private static final String ACCOUNT                         = "/account";
 
 
   public String getSearchTweet30DaysUrl(String envName) {
@@ -145,6 +146,18 @@ public class URLHelper {
            ALL_USER_FIELDS;
   }
 
+  public String getCurrentUserUrl() {
+	    return ROOT_URL_V1 +
+	           ACCOUNT +
+	           "/verify_credentials.json";
+	  }
+  
+  public String getHomeTimelineUrl() {
+	    return ROOT_URL_V1 +
+	           STATUSES +
+	           "/home_timeline.json";
+	  }
+  
   public String getUserUrl(String userId) {
     return ROOT_URL_V2 +
            USERS +

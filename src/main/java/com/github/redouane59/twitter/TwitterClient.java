@@ -1,5 +1,19 @@
 package com.github.redouane59.twitter;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -34,19 +48,7 @@ import com.github.redouane59.twitter.helpers.RequestHelper;
 import com.github.redouane59.twitter.helpers.RequestHelperV2;
 import com.github.redouane59.twitter.helpers.URLHelper;
 import com.github.redouane59.twitter.signature.TwitterCredentials;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -192,6 +194,34 @@ public class TwitterClient implements ITwitterClientV1, ITwitterClientV2, ITwitt
         .postRequest(url, new HashMap<>(), UserV1.class).orElseThrow(NoSuchElementException::new);
   }
 
+  public User getCurrentUser() {
+    String url = this.getUrlHelper().getCurrentUserUrl();
+    return this.requestHelper
+            .getRequest(url, UserV1.class).orElseThrow(NoSuchElementException::new);
+    //return this.requestHelperV2.getRequest(url, UserV1.class).orElseThrow(NoSuchElementException::new);
+  }
+  
+  public List<Tweet> getHomeTimeline(int count) {
+	  
+	    String         url    = this.getUrlHelper().getHomeTimelineUrl();
+	  List<TweetData> result = this.requestHelperV2.getRequest(url, TweetV2.class).orElseThrow(NoSuchElementException::new).getData();
+	    return result.stream().map(tweetData -> TweetV2.builder().data(tweetData).build()).collect(Collectors.toList());
+	  /*
+	    
+	  List<Tweet>   tweets = new ArrayList<>();
+	  List<Tweet> result;
+	  do {
+		  result = List.of(this.requestHelper.getRequest(this.getUrlHelper().getHomeTimelineUrl(), TweetV2[].class)
+	                                           .orElseThrow(NoSuchElementException::new));
+		  if (result.isEmpty()) {
+	        break;
+	      }
+	      tweets.addAll(result.subList(0, result.size() - 1)); // to avoid having duplicates
+	  } while (tweets.size() < count && result.size() > 1);
+	  return tweets;
+	  */
+  }
+  
   @Override
   public User getUserFromUserId(String userId) {
     String url = this.getUrlHelper().getUserUrl(userId);
@@ -485,7 +515,7 @@ public class TwitterClient implements ITwitterClientV1, ITwitterClientV2, ITwitt
     String url = this.urlHelper.getSampledStreamUrl();
     this.requestHelperV2.getAsyncRequest(url, consumer);
   }
-
+  
   @Override
   public List<Tweet> getUserTimeline(final String userId, int nbTweets) {
     return this.getUserTimeline(userId, nbTweets, null, null, null, null);

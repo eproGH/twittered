@@ -10,6 +10,8 @@ import java.util.List;
 
 public interface ITwitterClientV1 {
 
+	User getCurrentUser();
+
   /**
    * Like a tweet calling https://api.twitter.com/1.1/favorites/create.json
    *
